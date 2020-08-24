@@ -1,0 +1,6 @@
+development: &development
+  FB_DB_USERNAME: dev
+  FB_DB_PASSWORD: password
+  FB_DB_HOST: localhost
+  FB_DB_PORT: 5432
+  FB_DB_NAME: facebook_backend
