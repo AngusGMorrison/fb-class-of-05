@@ -3,9 +3,12 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -18,6 +21,7 @@ import (
 var env *viper.Viper
 
 func main() {
+	// Flags to control environment variable loading.
 	configName := flag.String(
 		"configName",
 		"environment",
@@ -28,16 +32,13 @@ func main() {
 		".",
 		"The path to the config file containing env vars required for the migration.",
 	)
-	steps := flag.Int("steps", 0, "Optional number of steps to migrate (default: all).")
-	version := flag.Int("version", 0, "Optional version to migrate to.")
 	flag.Parse()
 
 	// Ensure a command has been provided.
 	args := flag.Args()
-	if len(args) != 1 {
+	if len(args) == 0 {
 		fmt.Println("migrate must be used with a migration command")
-		fmt.Println("Usage: migrate <command> <flags>")
-		fmt.Println("Valid commands are down, drop, force, toVersion, up, and version.")
+		fmt.Println("Usage: migrate down | drop | up | version | force number | step number | toVersion number [-configName string] [-configPath string]")
 	}
 
 	// Load environment variables
@@ -48,12 +49,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = runMigration(args[0], *steps, *version)
+	// Run the specified command
+	err = runMigration(args[0], args[1:])
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "migrate: %v\n", err)
+		fmt.Fprintln(os.Stderr, err)
+	} else {
+		fmt.Println("Success!")
 	}
-
-	fmt.Println("Success!")
 }
 
 func loadEnvVars(configName, configPath string) (*viper.Viper, error) {
@@ -73,51 +75,70 @@ func loadEnvVars(configName, configPath string) (*viper.Viper, error) {
 	return viper.Sub(targetEnv), nil
 }
 
-func runMigration(command string, steps, version int) error {
-	fmt.Printf("Running migrate %s...\n", command)
+func runMigration(command string, args []string) error {
+	fmt.Printf("Running migrate %s %s...\n", command, strings.Join(args, " "))
 	m, err := migrate.New("file://db/migrations", databaseURL())
 	if err != nil {
-		return fmt.Errorf("runMigration: %v", err)
+		return migrationError(command, err)
+	}
+
+	var n int
+	if len(args) > 0 {
+		n, err = strconv.Atoi(args[0])
+		if err != nil {
+			return migrationError(command, err)
+		}
 	}
 
 	switch command {
 	case "down":
-		if steps > 0 {
-			return m.Steps(-steps)
-		} else {
-			return m.Down()
-		}
+		err = m.Down()
 	case "drop":
-		return m.Drop()
+		err = m.Drop()
 	case "force":
-		return m.Force(version)
-	case "toVersion":
-		return m.Migrate(uint(version))
-	case "up":
-		if steps > 0 {
-			return m.Steps(steps)
-		} else {
-			return m.Up()
+		if len(args) == 0 {
+			return migrationError(command, errors.New("a migration version number is required"))
 		}
+		err = m.Force(n)
+	case "steps":
+		if len(args) == 0 {
+			return migrationError(command, errors.New("the number of steps to migrate is required"))
+		}
+		err = m.Steps(n)
+	case "toVersion":
+		if len(args) == 0 {
+			return migrationError(command, errors.New("a migration version number is required"))
+		}
+		err = m.Migrate(uint(n))
+	case "up":
+		err = m.Up()
 	case "version":
 		version, dirty, err := m.Version()
 		if err != nil {
-			return err
+			return migrationError(command, err)
 		}
-		fmt.Printf("version: %d\ndirty: %t\n", version, dirty)
+		fmt.Printf("\tVersion: %d\n\tDirty: %t\n", version, dirty)
 	default:
-		return fmt.Errorf("runMigration: unknown command %s", command)
+		return migrationError(command, errors.New("unknown command"))
+	}
+
+	if err != nil {
+		return migrationError(command, err)
 	}
 	return nil
+}
+
+func migrationError(command string, err error) error {
+	return fmt.Errorf("migrate %s: %v", command, err)
 }
 
 func databaseURL() string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		env.Get("FB_DB_USERNAME"),
-		env.Get("FB_DB_PASSWORD"),
-		env.Get("FB_DB_HOST"),
-		env.Get("FB_DB_PORT"),
-		env.Get("FB_DB_NAME"),
+		env.Get("FB05_DB_USER"),
+		env.Get("FB05_DB_PASSWORD"),
+		env.Get("FB05_DB_HOST"),
+		env.Get("FB05_DB_PORT"),
+		env.Get("FB05_DB_NAME"),
 	)
 }
