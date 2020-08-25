@@ -53,6 +53,7 @@ func main() {
 	err = runMigration(args[0], args[1:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	} else {
 		fmt.Println("Success!")
 	}
