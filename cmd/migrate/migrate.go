@@ -39,6 +39,7 @@ func main() {
 	if len(args) == 0 {
 		fmt.Println("migrate must be used with a migration command")
 		fmt.Println("Usage: migrate down | drop | up | version | force number | step number | toVersion number [-configName string] [-configPath string]")
+		os.Exit(1)
 	}
 
 	// Load environment variables
@@ -59,10 +60,14 @@ func main() {
 	fmt.Println("Success!")
 }
 
+// targetEnvKey is the environment variable that specifies the
+// current project environment, e.g. development, test, etc.
+const targetEnvKey = "FB05_ENV"
+
 func loadEnvVars(configName, configPath string) (*viper.Viper, error) {
-	targetEnv := os.Getenv("FB05_ENV")
+	targetEnv := os.Getenv(targetEnvKey)
 	if targetEnv == "" {
-		return nil, fmt.Errorf("loadEnvVars: target environment unknown, FB_ENV is blank")
+		return nil, fmt.Errorf("loadEnvVars: target environment unknown, %s is blank", targetEnvKey)
 	}
 
 	fmt.Printf("Loading environment %q...\n", targetEnv)
@@ -83,6 +88,7 @@ func runMigration(command string, args []string) error {
 		return migrationError(command, err)
 	}
 
+	// Ensure numeric arguments can be parsed.
 	var n int
 	if len(args) > 0 {
 		n, err = strconv.Atoi(args[0])
@@ -91,6 +97,7 @@ func runMigration(command string, args []string) error {
 		}
 	}
 
+	// Run command.
 	switch command {
 	case "down":
 		err = m.Down()
