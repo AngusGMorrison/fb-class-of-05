@@ -59,7 +59,7 @@ func main() {
 }
 
 func loadEnvVars(configName, configPath string) (*viper.Viper, error) {
-	targetEnv := os.Getenv("FB_ENV")
+	targetEnv := os.Getenv("FB05_ENV")
 	if targetEnv == "" {
 		return nil, fmt.Errorf("loadEnvVars: target environment unknown, FB_ENV is blank")
 	}
