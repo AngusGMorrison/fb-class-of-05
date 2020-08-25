@@ -54,9 +54,9 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
-	} else {
-		fmt.Println("Success!")
 	}
+
+	fmt.Println("Success!")
 }
 
 func loadEnvVars(configName, configPath string) (*viper.Viper, error) {
