@@ -1,0 +1,6 @@
+test:
+  FB05_DB_USER: test_user
+  FB05_DB_PASSWORD: password
+  FB05_DB_HOST: test_host
+  FB05_DB_PORT: 1234
+  FB05_DB_NAME: test_db

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facebook: Class of 2005</title>
+  <!-- CSRF and CSP tags to follow -->
+  <link rel="stylesheet" href="/static/stylesheets/application.css" type="text/css">
+</head>
+<body>
+  <div class="page-container">
+    <div class="content-container">
+
+      <header class="facebook-banner">
+        <div class="banner-img-container">
+          {{/* add image */}}
+        </div>
+        <div class="banner-logo-nav-container">
+          <div class="logo-container">
+            {{/* add image */}}
+          </div>
+
+          <nav class="banner-nav-container">
+            {{/* update to make navbar conditional on login status */}}
+            {{/* <%= render partial: "layouts/partials/logged_out_nav" %>  */}}
+          </nav>
+        </div>
+      </header>
+
+      <aside class="sidebar-container">
+        {{/* <% if @current_user.id %>
+          <%= render partial: "layouts/partials/sidebar_search_form" %>
+          <%= render partial: "layouts/partials/sidebar_logged_in_nav" %>
+        <% else %>
+          <%= render partial: "layouts/partials/sidebar_logged_out_nav" %>
+        <% end %> */}}
+      </aside>
+
+      <section class="primary-content-container">
+          {{ template "primary_content" . }}
+      </section>
+
+      <footer class="footer-container">
+        <nav class="footer-nav">
+          <a href="https://web.archive.org/web/20050809082348/http://www.thefacebook.com/about.php" class="footer-link"> about </a>
+          <a href="https://web.archive.org/web/20050807012601/http://www.thefacebook.com/contact.php" class="footer-link">contact</a>
+          <a href="https://web.archive.org/web/20050804010542/http://www.thefacebook.com/jobs.php" class="footer-link">jobs</a>
+          <a href="https://web.archive.org/web/20050803233434/http://www.thefacebook.com/announce.php" class="footer-link">announce</a>
+          <a href="https://web.archive.org/web/20050804013040/http://www.thefacebook.com/media.php" class="footer-link">advertise</a>
+          <a href="https://web.archive.org/web/20050801011049/http://www.thefacebook.com/terms.php" class="footer-link">terms</a>
+          <a href="https://web.archive.org/web/20050827164526/http://www.thefacebook.com/policy.php" class="footer-link">privacy</a>
+        </nav>
+        <p class="small-print">a Mark Zuckerberg production</p>
+        <p class="small-print">Thefacebook &copy; 2005</p>
+      </footer>
+
+    </div>
+  </div>
+</body>
+</html>
+
