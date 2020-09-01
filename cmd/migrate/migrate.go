@@ -99,8 +99,8 @@ type migrator interface {
 	Down() error
 	Drop() error
 	Force(version int) error
-	Steps(n int) error
 	Migrate(n uint) error
+	Steps(n int) error
 	Up() error
 	Version() (uint, bool, error)
 }
