@@ -3,9 +3,11 @@
 package main
 
 import (
+	"angusgmorrison/fb05/pkg/envloader"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -13,24 +15,45 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
-// env stores environment variables loaded by viper. The variables
+// env is the current environment, e.g. development, prod, etc.
+var env string
+
+// envVars stores environment variables loaded by viper. The variables
 // loaded are specific to a single environment, e.g. development.
-var env *viper.Viper
+var envVars *viper.Viper
+
+var out io.Writer = os.Stdout
 
 func main() {
 	// Flags to control environment variable loading.
+	envKey := flag.String(
+		"envKey",
+		"FB05_ENV",
+		"The key used to look up the current environment, e.g., development, prod, etc.",
+	)
 	configName := flag.String(
 		"configName",
 		"environment",
 		"The name of the config file (without extension) containing env vars required for the migration.",
 	)
+	configType := flag.String(
+		"configType",
+		"yaml",
+		"The config file format, e.g. \"yaml\".",
+	)
 	configPath := flag.String(
 		"configPath",
 		".",
 		"The path to the config file containing env vars required for the migration.",
+	)
+	migrationDir := flag.String(
+		"migrationDir",
+		"db/migrations",
+		"The directory where migration files are stored.",
 	)
 	flag.Parse()
 
@@ -42,16 +65,26 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Load environment variables
+	// Load environment variables.
 	var err error
-	env, err = loadEnvVars(*configName, *configPath)
+	env = os.Getenv(*envKey)
+	envConfig := envloader.NewConfig(*configName, *configType, *configPath, env)
+	envVars, err = envloader.Load(envConfig)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "migrate: %v\n", err)
+		log.Error().Err(err)
 		os.Exit(1)
 	}
 
-	// Run the specified command
-	err = runMigration(args[0], args[1:])
+	// Create the migrator.
+	migrationPath := fmt.Sprintf("file://%s", *migrationDir)
+	m, err := migrate.New(migrationPath, databaseURL())
+	if err != nil {
+		fmt.Fprintln(os.Stderr, migrationError(args[0], err))
+		os.Exit(1)
+	}
+
+	// Run the specified command.
+	err = runMigration(m, args[0], args[1:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -60,36 +93,24 @@ func main() {
 	fmt.Println("Success!")
 }
 
-// targetEnvKey is the environment variable that specifies the
-// current project environment, e.g. development, test, etc.
-const targetEnvKey = "FB05_ENV"
-
-func loadEnvVars(configName, configPath string) (*viper.Viper, error) {
-	targetEnv := os.Getenv(targetEnvKey)
-	if targetEnv == "" {
-		return nil, fmt.Errorf("loadEnvVars: target environment unknown, %s is blank", targetEnvKey)
-	}
-
-	fmt.Printf("Loading environment %q...\n", targetEnv)
-	viper.SetConfigName(configName)
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(configPath)
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("loadEnvVars: %v", err)
-	}
-	// Return only the variables for the target environment.
-	return viper.Sub(targetEnv), nil
+// migrator describes the interface of the migrate package to
+// faciliate testing runMigration.
+type migrator interface {
+	Down() error
+	Drop() error
+	Force(version int) error
+	Steps(n int) error
+	Migrate(n uint) error
+	Up() error
+	Version() (uint, bool, error)
 }
 
-func runMigration(command string, args []string) error {
+func runMigration(m migrator, command string, args []string) error {
 	fmt.Printf("Running migrate %s %s...\n", command, strings.Join(args, " "))
-	m, err := migrate.New("file://db/migrations", databaseURL())
-	if err != nil {
-		return migrationError(command, err)
-	}
 
 	// Ensure numeric arguments can be parsed.
 	var n int
+	var err error
 	if len(args) > 0 {
 		n, err = strconv.Atoi(args[0])
 		if err != nil {
@@ -97,7 +118,6 @@ func runMigration(command string, args []string) error {
 		}
 	}
 
-	// Run command.
 	switch command {
 	case "down":
 		err = m.Down()
@@ -125,7 +145,7 @@ func runMigration(command string, args []string) error {
 		if err != nil {
 			return migrationError(command, err)
 		}
-		fmt.Printf("\tVersion: %d\n\tDirty: %t\n", version, dirty)
+		fmt.Fprintf(out, "\tVersion: %d\n\tDirty: %t\n", version, dirty)
 	default:
 		return migrationError(command, errors.New("unknown command"))
 	}
@@ -143,10 +163,10 @@ func migrationError(command string, err error) error {
 func databaseURL() string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		env.Get("FB05_DB_USER"),
-		env.Get("FB05_DB_PASSWORD"),
-		env.Get("FB05_DB_HOST"),
-		env.Get("FB05_DB_PORT"),
-		env.Get("FB05_DB_NAME"),
+		envVars.Get("FB05_DB_USER"),
+		envVars.Get("FB05_DB_PASSWORD"),
+		envVars.Get("FB05_DB_HOST"),
+		envVars.Get("FB05_DB_PORT"),
+		envVars.Get("FB05_DB_NAME"),
 	)
 }

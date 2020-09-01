@@ -1,4 +1,8 @@
 development: &development
+  # App
+  FB05_HOST: localhost
+  FB05_PORT: 8080
+  # Database
   FB05_DB_USER: fb05_dev
   FB05_DB_PASSWORD: password
   FB05_DB_HOST: localhost
@@ -6,4 +10,5 @@ development: &development
   FB05_DB_NAME: fb05_development
 test: &test
   <<: *development
+  # Database
   FB05_DB_NAME: fb05_test

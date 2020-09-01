@@ -1,0 +1,9 @@
+{
+  "test": {
+    "CURRENT_ENV": "test"
+  },
+  "production": {
+    "CURRENT_ENV": "production",
+    "PROD_ONLY": "secret"
+  }
+}
