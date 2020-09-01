@@ -20,8 +20,11 @@
             <img alt="facebook logo" src="/static/images/logo-right.jpg">
           </div>
           <nav class="banner-nav-container">
+            <a class="banner-nav-link" href="#">login</a>
+            <a class="banner-nav-link" href="#">register</a>
+            <a class="banner-nav-link" href="#">about</a>
+            <a class="banner-nav-link" href="#">faq</a>
             {{/* update to make navbar conditional on login status */}}
-            {{/* <%= render partial: "layouts/partials/logged_out_nav" %>  */}}
           </nav>
         </div>
       </header>
@@ -36,7 +39,7 @@
       </aside>
 
       <section class="primary-content-container">
-          {{template "primary_content" .}}
+        {{template "primary_content" .}}
       </section>
 
       <footer class="footer-container">

@@ -503,7 +503,7 @@ select {
 }
 
 .primary-button {
-  height: 19px;
+  height: 18px;
   background-color: var(--primary-blue);
   color: white;
   font: normal 11px Tahoma, Arial, sans-serif;
@@ -513,6 +513,11 @@ select {
   border-left: var(--button-highlight-border);
   border-bottom: var(--primary-border);
   border-right: var(--primary-border);
+}
+
+a.primary-button {
+  display: inline-block;
+  padding-top: 1px;
 }
 
 .primary-button a:visited {
@@ -532,4 +537,209 @@ p.small-print {
 .footer-link {
   padding-left: 3px;
   padding-right: 3px;
+}
+
+/** Public pages **/
+
+h1.widget-heading-no-header {
+  margin-top: 18px;
+}
+
+h1.widget-heading-no-header, h2.static-heading {
+  margin-bottom: 18px;
+
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.registration-body-column {
+  width: 488px;
+  margin: auto;
+}
+
+p.static-body {
+  margin-bottom: 13px;
+  line-height: normal;
+}
+
+.form-table.registration-form {
+  margin-top: 8px;
+  margin-left: 60px;
+}
+
+.registration-form td {
+  max-width: 160px;
+}
+
+.school-list {
+  font-size: 12px;
+  line-height: normal;
+  text-align: center;
+  margin: auto;
+  margin-bottom: 12px;
+  max-width: 393px;
+}
+
+.terms-and-conditions-container {
+  max-width: 60%;
+  margin-left: 66px;
+  margin-bottom: 14px;
+}
+
+.login-form-table {
+  margin: auto;
+  margin-bottom: 6px;
+}
+
+.form-table.login-form-table tr td {
+  width: auto;
+  padding-right: 3px;
+}
+
+.checkbox-container {
+  display: inline-block;
+  height: 100%;
+  vertical-align: top;
+  margin-right: 10px;
+  padding-top: 8px;
+
+}
+
+.terms-conditions-label-container {
+  display: inline-block;
+  width: 90%;
+}
+
+.terms-conditions-label {
+  font-size: 11px;
+}
+
+.primary-button.master-login {
+  width: 64px;
+  margin-right: 6px;
+}
+
+.primary-button.master-register {
+  width: 56px;
+}
+
+.registration-form .small-print {
+  text-align: center;
+}
+
+p.small-print.password {
+  margin-bottom: 12px;
+}
+
+.password-warning {
+  color: red;
+}
+
+.sidebar-login-form {
+  margin-bottom: 11px;
+}
+
+.sidebar-login-form .field-label-top-right {
+  display: block;
+  font-size: 11px;
+  text-align: right;
+}
+
+.sidebar-button-container {
+  margin-left: 6px;
+}
+
+.primary-widget-button-container {
+  margin-left: 38%;
+}
+
+
+/** Widgets **/
+
+.widget {
+  border: var(--primary-border);
+  margin-bottom: 18px;
+}
+
+.widget-header {
+  height: 18px;
+  background-color: var(--primary-blue);
+  padding-top: 1px;
+  padding-left: 2px;
+}
+
+h1.widget-heading {
+  font-size: 12px;
+  display: inline-block;
+  color: white;
+}
+
+h2.widget-heading {
+  display: inline-block;
+  color: white;
+}
+
+p.widget-subheading {
+  float: right;
+  margin-right: 2px;
+  color: white;
+}
+
+p.widget-subheading a {
+  color: white;
+}
+
+.widget-body {
+  padding: 2px;
+}
+
+.primary-widget-body {
+  padding: 18px 12px;
+}
+
+.sidebar-widget {
+  margin-bottom: 2px;
+}
+
+.search-form-container {
+  padding: 8px;
+}
+
+.sidebar-nav {
+  padding: 8px;
+}
+
+.sidebar-nav-link {
+  display: block;
+  font-size: 11px;
+}
+
+.sidebar-nav-link.sidebar-profile-link {
+  display: inline-block;
+}
+
+.search-form-container {
+  font-size: 11px;
+}
+
+.search-form-container .text-field {
+  width: 90px;
+}
+
+.highlight-button {
+  height: 19px;
+  background-color: var(--secondary-blue);
+  color: white;
+  font: normal 11px Tahoma, Arial, sans-serif;
+
+  padding: 0 8px;
+  border-top: var(--button-highlight-border);
+  border-left: var(--button-highlight-border);
+  border-bottom: var(--primary-border);
+  border-right: var(--primary-border);
+}
+
+input[type=submit].highlight-submit {
+  background-color: var(--secondary-blue);
 }
