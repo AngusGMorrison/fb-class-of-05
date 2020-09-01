@@ -6,17 +6,19 @@ import (
 	"net/http"
 )
 
-func homepageHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("internal/app/templates/shared/application.gohtml",
-		"internal/app/templates/public/homepage.gohtml")
-	if err != nil {
-		log.Printf("homepageHandler: %v\n", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
+var tmpls map[string]*template.Template
 
-	if err = t.Execute(w, nil); err != nil {
+func init() {
+	tmpls = make(map[string]*template.Template)
+	tmpls["homepage"] = template.Must(
+		template.ParseFiles(
+			sharedTmplDir+"/application.gohtml",
+			publicTmplDir+"/homepage.gohtml",
+		))
+}
+
+func homepageHandler(w http.ResponseWriter, r *http.Request) {
+	if err := tmpls["homepage"].Execute(w, nil); err != nil {
 		log.Printf("homepageHandler: %v\n", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)

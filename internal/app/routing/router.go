@@ -7,6 +7,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	templateDir   = "internal/app/templates"
+	sharedTmplDir = templateDir + "/shared"
+	publicTmplDir = templateDir + "/public"
+)
+
 // Router returns a mux that handles routing for the entire
 // application.
 func Router(mw []mux.MiddlewareFunc) *mux.Router {

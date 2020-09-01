@@ -13,13 +13,12 @@
 
       <header class="facebook-banner">
         <div class="banner-img-container">
-          {{/* add image */}}
+          <img alt="Al Pacino silhouette" src="/static/images/silhouette-logo-left.jpg">
         </div>
         <div class="banner-logo-nav-container">
           <div class="logo-container">
-            {{/* add image */}}
+            <img alt="facebook logo" src="/static/images/logo-right.jpg">
           </div>
-
           <nav class="banner-nav-container">
             {{/* update to make navbar conditional on login status */}}
             {{/* <%= render partial: "layouts/partials/logged_out_nav" %>  */}}
@@ -37,7 +36,7 @@
       </aside>
 
       <section class="primary-content-container">
-          {{ template "primary_content" . }}
+          {{template "primary_content" .}}
       </section>
 
       <footer class="footer-container">
