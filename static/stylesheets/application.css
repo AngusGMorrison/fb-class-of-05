@@ -464,8 +464,8 @@ textarea {
 
 .sidebar-container {
   display: inline-block;
-  width: 116px;
-  margin: 0 2px;
+  width: 118px;
+  margin-left: 2px;
 }
 
 .sidebar-widget {
@@ -518,6 +518,11 @@ select {
 a.primary-button {
   display: inline-block;
   padding-top: 1px;
+}
+
+.sidebar-widget a.primary-button {
+  position: relative;
+  top: -1px;
 }
 
 .primary-button a:visited {

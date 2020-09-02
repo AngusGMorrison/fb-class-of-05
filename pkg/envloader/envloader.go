@@ -9,12 +9,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-// LoadConfig details the configuration file to be loaded.
 type LoadConfig struct {
 	configName, configType, configPath, targetEnv string
 }
 
-// NewConfig is a convenience function for constructing LoadConfigs.
 func NewConfig(configName, configType, configPath, targetEnv string) *LoadConfig {
 	return &LoadConfig{configName, configType, configPath, targetEnv}
 }

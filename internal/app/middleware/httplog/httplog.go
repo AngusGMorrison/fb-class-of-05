@@ -10,15 +10,11 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// Logger embeds a *zerolog.Logger and records the current development
-// environment.
 type Logger struct {
 	*zerolog.Logger
 	env string
 }
 
-// NewLogger is a convenience function for creating new Loggers from
-// a *zerolog.Logger and the current environment.
 func NewLogger(logger *zerolog.Logger, env string) *Logger {
 	return &Logger{logger, env}
 }

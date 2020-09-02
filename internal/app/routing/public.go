@@ -6,6 +6,14 @@ import (
 	"net/http"
 )
 
+type currentUser struct {
+	LoggedIn bool
+}
+
+func getCurrentUser() *currentUser {
+	return &currentUser{}
+}
+
 var tmpls map[string]*template.Template
 
 func init() {
@@ -18,7 +26,7 @@ func init() {
 }
 
 func homepageHandler(w http.ResponseWriter, r *http.Request) {
-	if err := tmpls["homepage"].Execute(w, nil); err != nil {
+	if err := tmpls["homepage"].Execute(w, getCurrentUser()); err != nil {
 		log.Printf("homepageHandler: %v\n", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)

@@ -20,16 +20,38 @@
             <img alt="facebook logo" src="/static/images/logo-right.jpg">
           </div>
           <nav class="banner-nav-container">
-            <a class="banner-nav-link" href="#">login</a>
-            <a class="banner-nav-link" href="#">register</a>
-            <a class="banner-nav-link" href="#">about</a>
-            <a class="banner-nav-link" href="#">faq</a>
-            {{/* update to make navbar conditional on login status */}}
+            {{if .LoggedIn}}
+              <a class="banner-nav-link" href="#">home</a>
+              <a class="banner-nav-link" href="#">search</a>
+              <a class="banner-nav-link" href="#">faq</a>
+              <a class="banner-nav-link" href="#">logout</a>
+            {{else}}
+              <a class="banner-nav-link" href="#">login</a>
+              <a class="banner-nav-link" href="#">register</a>
+              <a class="banner-nav-link" href="#">about</a>
+              <a class="banner-nav-link" href="#">faq</a>
+            {{end}}
           </nav>
         </div>
       </header>
 
       <aside class="sidebar-container">
+        {{if .LoggedIn}}
+        {{else}}
+          <div class="sidebar-widget">
+            <form name="login" class="sidebar-login-form" action="/login" method="POST">
+              <label for="email" class="field-label-top-right">Email:</label>
+              <input type="text" name="email" class="text-field" />
+              <label for="password" class="field-label-top-right">Password:</label>
+              <input type="password" name="password" class="text-field" />
+              {{/* Add CSRF protection */}}
+              <div class="sidebar-button-container">
+                <button type="submit" form="login" class="primary-button">login</button>
+                <a class="primary-button" href="#">register</a>
+              </div>
+            </form>
+          </div>
+        {{end}}
         {{/* <% if @current_user.id %>
           <%= render partial: "layouts/partials/sidebar_search_form" %>
           <%= render partial: "layouts/partials/sidebar_logged_in_nav" %>

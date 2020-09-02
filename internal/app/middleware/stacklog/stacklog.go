@@ -18,14 +18,11 @@ import (
 // a development environment.
 var prettyStackWriter io.Writer = os.Stderr
 
-// Logger embeds a *zerolog.Logger and the current environment and
-// implements internal/app/middleware.Stacklogger.
 type Logger struct {
 	*zerolog.Logger
 	env string
 }
 
-// NewLogger returns a *Logger that embeds a *zerolog.Logger.
 func NewLogger(logger *zerolog.Logger, env string) *Logger {
 	return &Logger{logger, env}
 }
