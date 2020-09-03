@@ -11,7 +11,7 @@ type currentUser struct {
 }
 
 func getCurrentUser() *currentUser {
-	return &currentUser{}
+	return nil
 }
 
 var tmpls map[string]*template.Template
@@ -21,12 +21,15 @@ func init() {
 	tmpls["homepage"] = template.Must(
 		template.ParseFiles(
 			sharedTmplDir+"/application.gohtml",
+			sharedTmplDir+"/banner_nav.gohtml",
+			sharedTmplDir+"/sidebar_nav.gohtml",
 			publicTmplDir+"/homepage.gohtml",
 		))
 }
 
 func homepageHandler(w http.ResponseWriter, r *http.Request) {
-	if err := tmpls["homepage"].Execute(w, getCurrentUser()); err != nil {
+	data := struct{ User *currentUser }{}
+	if err := tmpls["homepage"].Execute(w, data); err != nil {
 		log.Printf("homepageHandler: %v\n", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
