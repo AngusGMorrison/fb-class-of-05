@@ -1,5 +1,5 @@
 // Package stacklog facilitates logging stack traces as structured
-// JSON and unstructed strings by embedding a *zerolog.Logger in a
+// JSON and unstructured strings by embedding a *zerolog.Logger in a
 // Logger struct that implements internal/app/middleware.Stacklogger.
 package stacklog
 

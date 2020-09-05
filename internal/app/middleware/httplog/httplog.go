@@ -11,12 +11,11 @@ import (
 )
 
 type Logger struct {
-	*zerolog.Logger // this can be further decoupled with an interface describing the methods of the zerolog logger that Log consumes.
-	env             string
+	*zerolog.Logger
 }
 
-func NewLogger(logger *zerolog.Logger, env string) *Logger {
-	return &Logger{logger, env}
+func NewLogger(logger *zerolog.Logger) *Logger {
+	return &Logger{logger}
 }
 
 // Log logs details of the HTTP request and response status using the

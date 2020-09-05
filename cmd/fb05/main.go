@@ -135,7 +135,7 @@ func configureRouter() *mux.Router {
 	// Configure middleware
 	globalLogger := &log.Logger
 	mw := []mux.MiddlewareFunc{
-		middleware.Logging(httplog.NewLogger(globalLogger, env)),
+		middleware.Logging(httplog.NewLogger(globalLogger)),
 		middleware.Recovery(stacklog.NewLogger(globalLogger, env)),
 	}
 	return routing.Router(mw)
