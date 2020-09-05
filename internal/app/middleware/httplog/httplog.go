@@ -11,8 +11,8 @@ import (
 )
 
 type Logger struct {
-	*zerolog.Logger
-	env string
+	*zerolog.Logger // this can be further decoupled with an interface describing the methods of the zerolog logger that Log consumes.
+	env             string
 }
 
 func NewLogger(logger *zerolog.Logger, env string) *Logger {

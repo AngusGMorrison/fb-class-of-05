@@ -6,6 +6,7 @@ import (
 	"angusgmorrison/fb05/internal/app/middleware/httplog"
 	"angusgmorrison/fb05/internal/app/middleware/stacklog"
 	"angusgmorrison/fb05/internal/app/routing"
+	"angusgmorrison/fb05/internal/app/templates"
 	"angusgmorrison/fb05/pkg/envloader"
 	"context"
 	"flag"
@@ -13,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -74,7 +76,14 @@ func main() {
 	envConfig := envloader.NewConfig(*configName, *configType, *configPath, env)
 	envVars, err = envloader.Load(envConfig)
 	if err != nil {
-		log.Error().Err(err)
+		log.Fatal().Err(err)
+		os.Exit(1)
+	}
+
+	// Parse templates.
+	err = templates.Initialize(filepath.Join("internal", "app", "templates"))
+	if err != nil {
+		log.Fatal().Err(err)
 		os.Exit(1)
 	}
 

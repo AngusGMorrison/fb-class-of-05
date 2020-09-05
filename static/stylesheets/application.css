@@ -518,9 +518,6 @@ select {
 a.primary-button {
   display: inline-block;
   padding-top: 1px;
-}
-
-.sidebar-widget a.primary-button {
   position: relative;
   top: -1px;
 }
@@ -568,6 +565,14 @@ p.static-body {
   line-height: normal;
 }
 
+p.static-body-small {
+  font-size: 11px;
+}
+
+.align-center {
+  text-align: center;
+}
+
 .form-table.registration-form {
   margin-top: 8px;
   margin-left: 60px;
@@ -592,9 +597,15 @@ p.static-body {
   margin-bottom: 14px;
 }
 
+.login-form {
+  margin-bottom: 22px;
+}
+
 .login-form-table {
   margin: auto;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  border-spacing: 0 4px;
+  border-collapse: separate;
 }
 
 .form-table.login-form-table tr td {
