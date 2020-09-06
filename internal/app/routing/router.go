@@ -13,8 +13,8 @@ func Router(mw []mux.MiddlewareFunc) *mux.Router {
 	router := mux.NewRouter()
 	router.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	router.HandleFunc("/login", loginHandler)
-	router.HandleFunc("/", homepageHandler)
+	router.HandleFunc("/login", loginHandler).Methods(http.MethodGet, http.MethodPost)
+	router.HandleFunc("/", homepageHandler).Methods(http.MethodGet)
 
 	for _, m := range mw {
 		router.Use(m)
