@@ -3,14 +3,13 @@ package main
 
 import (
 	"angusgmorrison/fb05/internal/app/middleware"
-	"angusgmorrison/fb05/internal/app/middleware/httplog"
-	"angusgmorrison/fb05/internal/app/middleware/stacklog"
 	"angusgmorrison/fb05/internal/app/routing"
 	"angusgmorrison/fb05/internal/app/templates"
 	"angusgmorrison/fb05/pkg/envloader"
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,9 +17,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/rs/zerolog/pkgerrors"
 	"github.com/spf13/viper"
 )
 
@@ -62,29 +58,25 @@ func main() {
 	flag.Parse()
 
 	if targetEnv := os.Getenv(envKey); targetEnv == "" {
-		log.Warn().
-			Msg(fmt.Sprintf("No value for env found at %q; defaulting to %q", envKey, defaultEnv))
+		log.Printf("%-8s %s", "INFO",
+			fmt.Sprintf("No value for env found at %q; defaulting to %q", envKey, defaultEnv))
 		env = defaultEnv
 	} else {
 		env = targetEnv
 	}
-
-	configureLogger(*debug)
 
 	// Load environment variables.
 	var err error
 	envConfig := envloader.NewConfig(*configName, *configType, *configPath, env)
 	envVars, err = envloader.Load(envConfig)
 	if err != nil {
-		log.Fatal().Err(err)
-		os.Exit(1)
+		log.Fatalf("%-8s %v", "FATAL", err)
 	}
 
 	// Parse templates.
 	err = templates.Initialize(filepath.Join("internal", "app", "templates"))
 	if err != nil {
-		log.Fatal().Err(err)
-		os.Exit(1)
+		log.Fatalf("%-8s %v", "FATAL", err)
 	}
 
 	// Configure and launch server.
@@ -93,50 +85,41 @@ func main() {
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      configureRouter(),
+		Handler:      configureRouter(*debug),
 	}
 
+	srvErrors := make(chan error, 1)
 	go func() {
-		log.Info().Str("addr", srv.Addr).Msg("Starting server")
+		log.Printf("%-8s Starting server at %s", "INFO", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil {
-			log.Error().Err(err)
+			srvErrors <- err
 		}
 	}()
 
 	// Trigger graceful shutdown when quit with SIGINT (Ctrl+C).
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
-	<-interrupt
 
-	log.Info().Msg("Shutting down gracefully...")
-	ctx, cancel := context.WithTimeout(context.Background(), *graceSeconds)
-	defer cancel()
-	srv.Shutdown(ctx)
-	os.Exit(0)
-}
-
-func configureLogger(debug bool) {
-	if debug {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	}
-
-	// Enable stack trace logging using Stack().
-	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-
-	if env == "development" {
-		// Pretty print logs.
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	select {
+	case <-interrupt:
+		log.Printf("%-8s %s", "INFO", "Shutting down gracefully...")
+		ctx, cancel := context.WithTimeout(context.Background(), *graceSeconds)
+		defer cancel()
+		srv.Shutdown(ctx)
+		os.Exit(0)
+	case err := <-srvErrors:
+		log.Printf("%-8s %v", "FATAL", err)
+		os.Exit(1)
 	}
 }
 
-func configureRouter() *mux.Router {
+func configureRouter(debug bool) *mux.Router {
 	// Configure middleware
-	globalLogger := &log.Logger
+	l := log.New(os.Stderr, "FB05 ", log.Ldate|log.Ltime)
+	dl := middleware.NewDebuggableLog(l, debug)
 	mw := []mux.MiddlewareFunc{
-		middleware.Logging(httplog.NewLogger(globalLogger)),
-		middleware.Recovery(stacklog.NewLogger(globalLogger, env)),
+		middleware.Logging(dl),
+		middleware.Recovery(dl),
 	}
-	return routing.Router(mw)
+	return routing.Router(l, mw)
 }
