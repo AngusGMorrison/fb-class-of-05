@@ -9,12 +9,14 @@ import (
 
 // Router returns a mux that handles routing for the entire
 // application.
-func Router(mw []mux.MiddlewareFunc) *mux.Router {
+func Router(log logger, mw []func(http.Handler) http.Handler) *mux.Router {
 	router := mux.NewRouter()
+	withLogger := loggingHandlerFactory(log)
+
 	router.PathPrefix("/static/").Handler(
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	router.HandleFunc("/login", loginHandler).Methods(http.MethodGet, http.MethodPost)
-	router.HandleFunc("/", homepageHandler).Methods(http.MethodGet)
+	router.Handle("/login", withLogger(loginHandler)).Methods(http.MethodGet, http.MethodPost)
+	router.Handle("/", withLogger(homepageHandler)).Methods(http.MethodGet)
 
 	for _, m := range mw {
 		router.Use(m)

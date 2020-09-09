@@ -3,8 +3,6 @@ package middleware
 import (
 	"net/http"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 const (
@@ -43,7 +41,7 @@ func (dl *DebuggableLog) Printf(format string, v ...interface{}) {
 }
 
 // Logging wraps an HTTP handler to log request details.
-func Logging(l logger) mux.MiddlewareFunc {
+func Logging(l logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hf := func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
