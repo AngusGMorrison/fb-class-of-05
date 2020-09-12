@@ -80,6 +80,22 @@ func TestGet(t *testing.T) {
 	}
 }
 
+func TestReset(t *testing.T) {
+	config := NewConfig("yamlenv", "yaml", fixturesDir(), "test")
+	err := Load(config)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if env.vars == nil {
+		t.Fatal("failed to load env vars")
+	}
+	Reset()
+	if env.vars != nil {
+		t.Fatalf("want env.vars to be nil, got %v", env.vars)
+	}
+}
+
 func fixturesDir() string {
 	dir, _ := os.Getwd()
 	return filepath.Join(dir, "fixtures")

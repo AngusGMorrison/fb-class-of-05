@@ -3,6 +3,7 @@ module angusgmorrison/fb05
 go 1.15
 
 require (
+	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/gorilla/mux v1.8.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/pkg/errors v0.9.1

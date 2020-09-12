@@ -60,3 +60,9 @@ func Get(key string) interface{} {
 	}
 	return env.vars.Get(key)
 }
+
+func Reset() {
+	env.Lock()
+	env.vars = nil
+	env.Unlock()
+}
