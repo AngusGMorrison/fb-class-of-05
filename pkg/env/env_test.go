@@ -3,6 +3,7 @@ package env
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -18,8 +19,7 @@ func TestNewConfig(t *testing.T) {
 func TestLoad(t *testing.T) {
 	envKey := "CURRENT_ENV"
 	currentEnv := "test"
-	dir, _ := os.Getwd()
-	fmt.Println(dir)
+
 	testCases := []struct {
 		name, fileType string
 	}{
@@ -29,20 +29,58 @@ func TestLoad(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("loads env vars from %s", tc.fileType), func(t *testing.T) {
-			config := NewConfig(tc.name, tc.fileType, dir+"/fixtures", currentEnv)
-			envVars, err := Load(config)
+			config := NewConfig(tc.name, tc.fileType, fixturesDir(), currentEnv)
+			err := Load(config)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if gotVar := envVars.Get(envKey); gotVar != currentEnv {
-				t.Fatalf("want %s=%s, got %s", envKey, currentEnv, gotVar)
+
+			if gotVar := env.vars.Get(envKey); gotVar != currentEnv { // not thread-safe
+				t.Fatalf("want %s=%s, got %s=%s", envKey, currentEnv, envKey, gotVar)
 			}
 
 			prodOnlyKey := "PROD_ONLY"
-			if prodVar := envVars.Get(prodOnlyKey); prodVar != nil {
+			if prodVar := env.vars.Get(prodOnlyKey); prodVar != nil { // not thread-safe
 				t.Fatalf("want env var %s to be inaccessible, got %s=%s",
 					prodOnlyKey, prodOnlyKey, prodVar)
 			}
 		})
 	}
+}
+
+func TestGet(t *testing.T) {
+	t.Run("calling Get before Load", func(t *testing.T) {
+		got := Get("CURRENT_ENV")
+		if got != nil {
+			t.Errorf("want Get to return nil when called before Load, got %v", got)
+		}
+	})
+
+	config := NewConfig("yamlenv", "yaml", fixturesDir(), "test")
+	err := Load(config)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := []struct {
+		key  string
+		want interface{}
+	}{
+		{"CURRENT_ENV", "test"},
+		{"NOT_PRESENT", nil},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("Get(%q)", tc.key), func(t *testing.T) {
+			got := Get(tc.key)
+			if got != tc.want {
+				t.Errorf("want %s=%v, got %s=%v", tc.key, tc.want, tc.key, got)
+			}
+		})
+	}
+}
+
+func fixturesDir() string {
+	dir, _ := os.Getwd()
+	return filepath.Join(dir, "fixtures")
 }
