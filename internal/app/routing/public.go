@@ -2,8 +2,6 @@ package routing
 
 import (
 	"angusgmorrison/fb05/internal/app/templates"
-	"bytes"
-	"html/template"
 	"net/http"
 )
 
@@ -31,7 +29,7 @@ func homepageHandler(w http.ResponseWriter, r *http.Request, log logger) {
 			return
 		}
 	default:
-		http.NotFound(w, r)
+		notAllowed(w, r)
 		return
 	}
 }
@@ -53,16 +51,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request, log logger) {
 		}
 	case http.MethodPost:
 	default:
-		http.NotFound(w, r)
+		notAllowed(w, r)
+		return
 	}
-}
-
-func writeTemplate(w http.ResponseWriter, t *template.Template, data interface{}) error {
-	var b bytes.Buffer
-	if err := t.Execute(&b, data); err != nil {
-		return err
-	}
-
-	_, err := b.WriteTo(w)
-	return err
 }
