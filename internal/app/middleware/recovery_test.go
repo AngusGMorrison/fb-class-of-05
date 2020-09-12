@@ -1,85 +1,53 @@
 package middleware
 
-// import (
-// 	"bytes"
-// 	"fmt"
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"runtime"
-// 	"strings"
-// 	"testing"
+import (
+	"bytes"
+	"errors"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+)
 
-// 	"github.com/gorilla/mux"
-// 	"github.com/pkg/errors"
-// )
+func TestRecovery(t *testing.T) {
+	tracingPanicHandler := func(w http.ResponseWriter, r *http.Request) {
+		panic(errors.New("panic")) // implements stackTracer
+	}
+	nontracingPanicHandler := func(w http.ResponseWriter, r *http.Request) {
+		var i interface{}
+		_ = i.(int) // panic generated doesn't implement stackTracer
+	}
 
-// type mockStackLogger struct {
-// 	bytes.Buffer
-// }
+	testCases := []struct {
+		path               string
+		handlerFn          http.HandlerFunc
+		wantCode           int
+		wantTraceToContain string
+	}{
+		{"/stackTracer", tracingPanicHandler, http.StatusInternalServerError, "TestRecovery"},
+		{"/notStackTracer", nontracingPanicHandler, http.StatusInternalServerError, "TestRecovery"},
+	}
 
-// func (m *mockStackLogger) LogStructuredStack(tracer StackTracer) {
-// 	for _, f := range tracer.StackTrace() {
-// 		m.WriteString(fmt.Sprintf("%+s:%d\n", f, f))
-// 	}
-// }
+	for _, tc := range testCases {
+		t.Run(tc.path, func(t *testing.T) {
+			var buf bytes.Buffer
+			testLogger := log.New(&buf, "", 0)
+			withRecovery := Recovery(testLogger)
+			mux := http.NewServeMux()
+			mux.Handle(tc.path, withRecovery(http.HandlerFunc(tc.handlerFn)))
 
-// func (m *mockStackLogger) LogUnstructuredStack(err error) {
-// 	buf := make([]byte, 1000)
-// 	runtime.Stack(buf, false)
-// 	m.Write(buf)
-// }
+			rec := httptest.NewRecorder()
+			req, _ := http.NewRequest("GET", tc.path, nil)
+			mux.ServeHTTP(rec, req)
 
-// func TestRecovery(t *testing.T) {
-// 	testCases := []struct {
-// 		desc                string
-// 		path                string
-// 		hf                  http.HandlerFunc
-// 		wantOutputToContain string
-// 	}{
-// 		{
-// 			"recovered object implements stackTracer",
-// 			"/",
-// 			func(w http.ResponseWriter, r *http.Request) {
-// 				panic(errors.New("test error"))
-// 			},
-// 			"TestRecovery.func1", // the anonymous http.HandlerFunc where the trace is created
-// 		},
-// 		{
-// 			"recovered object does not implement stackTracer",
-// 			"/",
-// 			func(w http.ResponseWriter, r *http.Request) {
-// 				var i interface{}
-// 				_ = i.(int) // cause an interface conversion panic
-// 			},
-// 			// LogUnstructuredStack generates the stack trace, so its name
-// 			// ought to be present within it.
-// 			"LogUnstructuredStack",
-// 		},
-// 	}
-
-// 	for _, tc := range testCases {
-// 		t.Run(tc.desc, func(t *testing.T) {
-// 			// Configure a test router with recovery middleware.
-// 			router := mux.NewRouter()
-// 			logger := new(mockStackLogger)
-// 			router.Use(Recovery(logger))
-// 			router.HandleFunc(tc.path, tc.hf)
-
-// 			// Make the request to the test path.
-// 			rec := httptest.NewRecorder()
-// 			req, _ := http.NewRequest("GET", tc.path, nil)
-// 			router.ServeHTTP(rec, req)
-
-// 			// Evaluate output
-// 			if gotCode := rec.Result().StatusCode; gotCode != http.StatusInternalServerError {
-// 				t.Errorf("want status code %d, got %d", http.StatusInternalServerError, gotCode)
-// 			}
-
-// 			output := logger.String()
-// 			if !strings.Contains(output, tc.wantOutputToContain) {
-// 				t.Errorf("want stack trace to contain %q, got trace %q",
-// 					tc.wantOutputToContain, output)
-// 			}
-// 		})
-// 	}
-// }
+			if rec.Code != tc.wantCode {
+				t.Errorf("want status code %d, got %d", tc.wantCode, rec.Code)
+			}
+			if gotLog := buf.String(); !strings.Contains(gotLog, tc.wantTraceToContain) {
+				t.Errorf("want logged stack trace to contain %q, got trace %q",
+					tc.wantTraceToContain, gotLog)
+			}
+		})
+	}
+}
