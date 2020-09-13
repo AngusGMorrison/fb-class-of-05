@@ -99,7 +99,7 @@ func loadPrerequisites() error {
 
 	// Parse templates.
 	go func() {
-		err := templates.Initialize(filepath.Join("internal", "app", "templates"))
+		err := templates.Initialize(filepath.Join("web", "templates"))
 		if err != nil {
 			fatalErrors <- err
 		}
