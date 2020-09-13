@@ -31,6 +31,7 @@ func TestLoad(t *testing.T) {
 		t.Run(fmt.Sprintf("loads env vars from %s", tc.fileType), func(t *testing.T) {
 			config := NewConfig(tc.name, tc.fileType, fixturesDir(), currentEnv)
 			err := Load(config)
+			defer Reset()
 			if err != nil {
 				t.Fatal(err)
 			}
