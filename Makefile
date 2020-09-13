@@ -1,3 +1,6 @@
+test:
+	go test ./...
+
 # Avoid pg_dump version mismatch where multiple postgres versions are
 # installed by specifying the absolute path.
 PG_DUMP=/usr/local/opt/postgresql@12/bin/pg_dump
