@@ -6,8 +6,6 @@ import (
 	"net/http"
 )
 
-// WrappedWriter embeds a response writer, capturing fields like
-// status for later access.
 type WrappedWriter struct {
 	http.Flusher
 	http.ResponseWriter
@@ -15,8 +13,6 @@ type WrappedWriter struct {
 	size   int
 }
 
-// WrapResponseWriter creates and returns a pointer to a new
-// WrappedWriter from an http.ResponseWriter.
 func WrapResponseWriter(w http.ResponseWriter) *WrappedWriter {
 	return &WrappedWriter{ResponseWriter: w}
 }
@@ -28,8 +24,6 @@ func (ww *WrappedWriter) Status() int {
 	return ww.status
 }
 
-// WriteHeader sets the status code of the underlying
-// http.ResponseWriter and records it.
 func (ww *WrappedWriter) WriteHeader(code int) {
 	ww.status = code
 	ww.ResponseWriter.WriteHeader(code)

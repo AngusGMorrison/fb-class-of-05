@@ -3,11 +3,12 @@
 package main
 
 import (
-	"angusgmorrison/fb05/pkg/envloader"
+	"angusgmorrison/fb05/pkg/env"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -15,16 +16,10 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 )
 
-// env is the current environment, e.g. development, prod, etc.
-var env string
-
-// envVars stores environment variables loaded by viper. The variables
-// loaded are specific to a single environment, e.g. development.
-var envVars *viper.Viper
+// currentEnv is the current environment, e.g. development, prod, etc.
+var currentEnv string
 
 var out io.Writer = os.Stdout
 
@@ -66,12 +61,11 @@ func main() {
 	}
 
 	// Load environment variables.
-	var err error
-	env = os.Getenv(*envKey)
-	envConfig := envloader.NewConfig(*configName, *configType, *configPath, env)
-	envVars, err = envloader.Load(envConfig)
+	currentEnv = os.Getenv(*envKey)
+	envConfig := env.NewConfig(*configName, *configType, *configPath, currentEnv)
+	err := env.Load(envConfig)
 	if err != nil {
-		log.Error().Err(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
@@ -79,14 +73,14 @@ func main() {
 	migrationPath := fmt.Sprintf("file://%s", *migrationDir)
 	m, err := migrate.New(migrationPath, databaseURL())
 	if err != nil {
-		fmt.Fprintln(os.Stderr, migrationError(args[0], err))
+		log.Println(migrationError(args[0], err))
 		os.Exit(1)
 	}
 
 	// Run the specified command.
 	err = runMigration(m, args[0], args[1:])
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
@@ -99,8 +93,8 @@ type migrator interface {
 	Down() error
 	Drop() error
 	Force(version int) error
-	Steps(n int) error
 	Migrate(n uint) error
+	Steps(n int) error
 	Up() error
 	Version() (uint, bool, error)
 }
@@ -163,10 +157,10 @@ func migrationError(command string, err error) error {
 func databaseURL() string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
-		envVars.Get("FB05_DB_USER"),
-		envVars.Get("FB05_DB_PASSWORD"),
-		envVars.Get("FB05_DB_HOST"),
-		envVars.Get("FB05_DB_PORT"),
-		envVars.Get("FB05_DB_NAME"),
+		env.Get("FB05_DB_USER"),
+		env.Get("FB05_DB_PASSWORD"),
+		env.Get("FB05_DB_HOST"),
+		env.Get("FB05_DB_PORT"),
+		env.Get("FB05_DB_NAME"),
 	)
 }

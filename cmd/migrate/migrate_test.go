@@ -1,7 +1,7 @@
 package main
 
 import (
-	"angusgmorrison/fb05/pkg/envloader"
+	"angusgmorrison/fb05/pkg/env"
 	"bytes"
 	"errors"
 	"fmt"
@@ -106,13 +106,12 @@ func TestMigrationError(t *testing.T) {
 }
 
 func TestDatabaseURL(t *testing.T) {
-	envConfig := envloader.NewConfig("environment", "yaml", "fixtures", "test")
-	var err error
-	envVars, err = envloader.Load(envConfig)
+	envConfig := env.NewConfig("environment", "yaml", "fixtures", "test")
+	err := env.Load(envConfig)
 	if err != nil {
 		t.Fatalf("failed to load environment: %v", err)
 	}
-	defer func() { envVars = nil }()
+	defer func() { env.Reset() }()
 
 	wantDBURL := "postgres://test_user:password@test_host:1234/test_db?sslmode=disable"
 	if gotDBURL := databaseURL(); gotDBURL != wantDBURL {

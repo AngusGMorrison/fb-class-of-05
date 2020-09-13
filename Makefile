@@ -40,4 +40,4 @@ db_test_prepare:
 	psql --set ON_ERROR_STOP=on fb05_test < $(SCHEMA)
 
 run_dev:
-	go run cmd/fb05/main.go
+	go run cmd/fb05/main.go -debug true
