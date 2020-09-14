@@ -17,8 +17,8 @@ spec:
           image: angusgmorrison/fb05:latest
           resources:
             limits:
-              cpu: "1"
-              memory: "1Gi"
+              cpu: "0.5"
+              memory: "500M"
           livenessProbe:
             httpGet:
               path: /
