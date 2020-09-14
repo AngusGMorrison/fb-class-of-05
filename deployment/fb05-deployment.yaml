@@ -15,10 +15,6 @@ spec:
       containers:
         - name: fb05
           image: angusgmorrison/fb05:latest
-          resources:
-            limits:
-              cpu: "0.5"
-              memory: "500M"
           livenessProbe:
             httpGet:
               path: /
