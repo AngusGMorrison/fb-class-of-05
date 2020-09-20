@@ -1,3 +1,6 @@
+production:
+  FB05_HOST: 0.0.0.0
+  FB05_PORT: 8080
 development: &development
   # App
   FB05_HOST: localhost

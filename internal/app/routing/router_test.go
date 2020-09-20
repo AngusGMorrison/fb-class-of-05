@@ -13,7 +13,7 @@ import (
 
 func templatesDir() string {
 	cwd, _ := os.Getwd()
-	return filepath.Join(cwd, "..", "templates")
+	return filepath.Join(cwd, "..", "..", "..", "web", "templates")
 }
 
 func testMethodNotAllowed(router *mux.Router, r *http.Request, t *testing.T) {
