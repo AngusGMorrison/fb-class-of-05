@@ -69,7 +69,10 @@ func main() {
 		currentEnv = targetEnv
 	}
 
-	err := loadPrerequisites()
+	done := make(chan struct{})
+	defer close(done)
+
+	err := loadPrerequisites(done)
 	if err != nil {
 		log.Fatalf("%-8s %v", "FATAL", err)
 	}
@@ -81,7 +84,7 @@ func main() {
 	}
 }
 
-func loadPrerequisites() error {
+func loadPrerequisites(done <-chan struct{}) error {
 	fatalErrors := make(chan error, 1)
 	wgDone := make(chan interface{})
 	var wg sync.WaitGroup // start-up concurrently
@@ -99,10 +102,7 @@ func loadPrerequisites() error {
 
 	// Parse templates.
 	go func() {
-		err := templates.Initialize(filepath.Join("web", "templates"))
-		if err != nil {
-			fatalErrors <- err
-		}
+		templates.InitCache(done, filepath.Join("web", "templates"))
 		wg.Done()
 	}()
 

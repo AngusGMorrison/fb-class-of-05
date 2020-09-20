@@ -1,10 +1,12 @@
 production:
   FB05_HOST: 0.0.0.0
   FB05_PORT: 8080
+  GET_TIMEOUT: 10
 development: &development
   # App
   FB05_HOST: localhost
   FB05_PORT: 8080
+  GET_TIMEOUT: 5
   # Database
   FB05_DB_USER: fb05_dev
   FB05_DB_PASSWORD: password
